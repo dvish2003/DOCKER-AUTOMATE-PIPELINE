@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Replace with your Jenkins credentials ID
-        DCOKER_IMAGE = 'your-dockerhub-username/your-image-name' // Replace with your Docker Hub username and image name}
-
     stages {
         stage('Clone Repository') {
             steps {
