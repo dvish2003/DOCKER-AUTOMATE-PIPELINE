@@ -2,51 +2,29 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Jenkins credentials ID (username + password)
-        DOCKER_IMAGE = 'dvish2003/node-docker-app' // your Docker Hub repo
-    }
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials-id') // Replace with your Jenkins credentials ID
+        DCOKER_IMAGE = 'your-dockerhub-username/your-image-name' // Replace with your Docker Hub username and image name}
 
     stages {
         stage('Clone Repository') {
             steps {
                 echo 'Cloning repository...'
+                // Add your clone steps here
                 git branch: 'main', url: 'https://github.com/dvish2003/DOCKER-AUTOMATE-PIPELINE.git'
+
             }
         }
 
-        stage('Install & Test') {
+          stage('Login to Docker Hub') {
             steps {
-                echo 'Installing dependencies...'
-                sh 'npm install'
-
-                echo 'Running tests...'
-                // won’t fail the pipeline if tests are missing
-                sh 'npm test || echo "No tests configured, skipping..."'
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                echo 'Building Docker image...'
-                sh "docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} ."
-                sh "docker tag ${DOCKER_IMAGE}:${BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
-            }
-        }
-
-        stage('Login & Push to Docker Hub') {
-            steps {
-                script {
-                    sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-                    sh "docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_IMAGE}:latest"
+                withCredentials([string(credentialsId: 'test-dockerhub-password', variable: 'test-docker-hub-password')]) {
+                    script {
+                        sh "docker login -u dvish2003 -p '${test-docker-hub-password}'"
+                        echo "Logged in to Docker Hub as dvish2003"
+                    }
                 }
             }
         }
-    }
 
-    post {
-        always {
-            sh 'docker logout'
-        }
-    }
+       
 }
