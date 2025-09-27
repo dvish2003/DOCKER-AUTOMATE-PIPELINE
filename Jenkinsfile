@@ -1,26 +1,37 @@
 pipeline {
     agent any
-
+    
     stages {
-        stage('Clone Repository') {
+        stage('SCM Checkout') {
             steps {
-                echo 'Cloning repository...'
-                // Add your clone steps here
+                retry(3) {
                 git branch: 'main', url: 'https://github.com/dvish2003/DOCKER-AUTOMATE-PIPELINE.git'
-
+                }
             }
         }
-
-          stage('Login to Docker Hub') {
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t dvish2003/nodeapp-cuban:${BUILD_NUMBER} .'
+            }
+        }
+        stage('Login to Docker Hub') {
             steps {
               withCredentials([string(credentialsId: 'test-dockerhubpassword', variable: 'test-dockerhubpass')]) {
-                    script {
+                    script {  
                         sh "docker login -u dvish2003 -p '${test-dockerhubpass}'"
-                        echo "Logged in to Docker Hub as dvish2003"
                     }
                 }
             }
         }
-
+        stage('Push Image') {
+            steps {
+                sh "docker push dvish2003/nodeapp-cuban:${BUILD_NUMBER}"
+            }
+        }
+    }
+    post {
+        always {
+            sh 'docker logout'
+        }
     }
 }
