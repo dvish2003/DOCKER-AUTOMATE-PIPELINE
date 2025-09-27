@@ -13,7 +13,8 @@ pipeline {
 
           stage('Login to Docker Hub') {
             steps {
-                withCredentials([string(credentialsId: 'test-dockerhub-password', variable: 'test-docker-hub-password')]) {
+              withCredentials([string(credentialsId: 'test-dockerhubpassword', variable: 'test-dockerhubpass')]) {
+    // some block
                     script {
                         sh "docker login -u dvish2003 -p '${test-docker-hub-password}'"
                         echo "Logged in to Docker Hub as dvish2003"
